@@ -1,1 +1,14 @@
+Room : Advanced SQL injection
+
+The SQL injection remains one of web applications most server and widespread security vlunerabilites . In this we will understand advanced SQL injection techniques, providing a coprehenxive understanding of sophisticated attack vectors and mitigation strategies.
+
+Learning objectives
+Throughout this room, we will gain a comprehexive undrstanding of the following key concepts:
+* Second-order SQL injeciton
+* Filter evasion
+* Out-of-band SQL injection
+* Automation techniques
+* Mitigation measures
+
+
 
